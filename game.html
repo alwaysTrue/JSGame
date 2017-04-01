@@ -1,0 +1,537 @@
+<html>
+  <head>
+    <style>
+#game {
+  border: solid 1px black;
+  position: absolute;
+  left: 200px;
+  top: 50px;
+}
+#miniMap {
+  border: solid 1px black;
+  position: absolute;
+  left: 720px;
+  top: 50px;
+}
+#tileSelect {
+  border: solid 1px black;
+  position: absolute;
+  left: 720px;
+  top: 362px;
+}
+#info {
+  border: solid 1px black;
+  background-color: #aaaaaa;
+  color: #00ff00;
+  width: 130px;
+  padding: 10px;
+  position: absolute;
+  top: 50px;
+}
+    </style>
+  </head>
+  <body>
+  	<script>
+
+var key = { 
+  a: false,
+  d: false,
+  s: false,
+  w: false,
+  last: "s" 
+          }, 
+    allowBattle = false, 
+    sprite = new Image(),
+    mapImg = new Image(),
+    pauseImg = new Image(),
+    shadowImg = new Image(),
+    itemImg = new Image();
+
+sprite.src = "http://imgur.com/ZaAwQFj.png";
+mapImg.src = "http://i.imgur.com/cJseltP.png";
+pauseImg.src = "http://imgur.com/EFbEjuK.png";
+shadowImg.src = "http://imgur.com/BwGusz4.png";
+itemImg.src = "http://imgur.com/yZgwBJi.png";
+
+var map = [ 
+           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,0,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,5,4,4,5,5,5,5,5,4,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,5,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,4,0,0,0,0,0,5,5,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,5,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,0,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,5,4,4,5,5,5,5,5,4,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,5,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,4,0,0,0,0,0,5,5,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,0,5,5,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,5,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0],
+           [1,1,1,1,1,4,4,4,4,4,0,0,0,0,0,4,4,4,4,4,4,4,4,4,1,1,0,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0]
+           ],
+  modMap = [];
+var mapLoc = { 
+  x: 5,
+  y: 5,
+  rX: 5,
+  rY: 5,
+  xC: 0,
+  yC: 0
+},
+    _x = 0,
+    _y = 0,
+    pause = false,
+    counter = 0,
+    walkTime = new Date().getTime(),
+    jump = 0,
+    jumpUp = true,
+    itemLoc = [[0,0,false,true],[35,0,true,false],[60,0,true,false]],
+    itemNum = 0,
+    itemList = [[[0,0],[100,100],false,true],
+                [[35,0],[7,5], true],
+                [[0,0],[7,7], false,true],
+                [[0,0],[5,10], false,true],
+                [[0,0],[5,8], false,true],
+                [[0,0],[5,9], false,true],
+                [[0,0],[7,6], false,true],
+                [[0,0],[5,16], false,true],
+                [[0,0],[5,11], false,true],
+                [[0,0],[5,12], false,true],
+                [[0,0],[5,13], false,true],
+                [[0,0],[5,14], false,true],
+                [[0,0],[5,15], false,true],
+                [[0,0],[6,17], false,true],
+                [[0,0],[7,18], false,true],
+                [[0,0],[8,18], false,true],
+                [[0,0],[10,18], false,true],
+                [[0,0],[9,18], false,true],
+                [[60,0],[8,6], true],
+                [[60,0],[20,8], true],
+                [[60,0],[21,7], true],
+                [[60,0],[19,8], true],
+                [[60,0],[18,8], true],
+                [[60,0],[17,7], true],
+                [[60,0],[20,5], true],
+                [[60,0],[18,5], true],
+                [[60,0],[19,5], true],
+                [[60,0],[17,6], true],
+                [[60,0],[21,6], true],
+                [[0,0],[20,20], false,true]]; 
+
+setInterval(function(){
+      if (jump >= 15) jumpUp = false;
+      if (jump < 0) jumpUp = true;
+      if (jumpUp){
+        jump += 2.5;
+      }
+      else {
+        jump -= 2.5;
+      }
+      document.getElementById("info").innerHTML = "<h3>Input/Data</h3><br>map X: <font color='gold'>" + mapLoc.x + "</font><br> map Y: <font color='gold'>" + mapLoc.y + "</font><br> player X:<font color='gold'> " + mapLoc.rX + "</font><br> player Y: <font color='gold'>" + mapLoc.rY + "</font><br>a: <font color='red'>" + key.a + "</font><br>s: <font color='red'>" + key.s + "</font><br>d: <font color='red'>" + key.d + "</font><br>w: <font color='red'>" + key.w + "</font>";
+    },20);
+
+function data(a){
+  if (a == 1) return document.getElementById("miniMap").getContext('2d');
+  else if (a == 2) return document.getElementById("tileSelect").getContext('2d');
+  else return document.getElementById("game").getContext('2d');
+}
+
+function main(){ 
+  data().clearRect(0,0,800,600);
+  if (!pause){
+    drawMap();
+	  keyCheck();
+    setTimeout(main,1000/60); 
+  }
+  else pauseMenu();
+}
+
+function tileMod(x,y){
+  var exists = false,
+      index;
+  for (var i = 0, k = modMap.length; i < k; i++){
+    if (modMap[i][0] == mapLoc.xC && modMap[i][1] == mapLoc.yC){
+      exists = true;
+      index = i;
+    }
+  }
+  if (exists){
+    if (modMap[index][2].length-1 >= x){
+      if (modMap[index][2][x].length-1 >= y){
+        modMap[index][2][x][y] = 5;
+      }
+    }
+  }
+  else {
+    modMap.push([mapLoc.xC,mapLoc.yC,map]);
+    if (modMap[modMap.length-1][2].length-1 >= x){
+      if (modMap[modMap.length-1][2][x].length-1 >= y){
+        modMap[modMap.length-1][2][x][y] = 5;
+      }
+      else (console.log("rip"));
+    }
+  }
+}
+
+function drawMap(){ 
+   var a = data(0),
+       b = [[0,0],[54,0],[0,48],[54,50],[0,100],[54,100]],
+       c = data(1),
+       d = [],
+       realMap = map,
+       noModdedTiles = true;
+       _x = mapLoc.x;
+       _y = mapLoc.y;
+
+  for (var i = 0, k = modMap.length; i < k; i++){
+    if (modMap[i][0] == mapLoc.xC && modMap[i][1] == mapLoc.yC){
+      realMap = modMap[i][2];
+      noModdedTiles = false;
+    }
+  }
+
+  if (noModdedTiles){ 
+    realMap = map;
+  }
+
+   for (var i = -5; i <= 5; i++){
+     for (var k = -5; k <= 5; k++){
+        if (_x + i > 14) _x -= realMap[0].length-7;
+        if (_y + k > 14) _y -= realMap.length-7;
+        if (_x + i < 5) _x += realMap[0].length-7;
+        if (_y + k < 5) _y += realMap.length-7;
+        a.drawImage(mapImg,b[realMap[_y+k][_x+i]][0],b[realMap[_y+k][_x+i]][1],45,45,225+(i*45),225+(k*45),45,45);
+        for (var i2 = 0, stop = itemList.length; i2 < stop; i2++){
+          if (mapLoc.rX+(mapLoc.xC*(realMap[0].length-7)) == _x && mapLoc.rY+(mapLoc.yC*(realMap.length-7)) == _y && mapLoc.rX+i == itemList[i2][1][0] && mapLoc.rY+k == itemList[i2][1][1])
+              d.push([[itemList[i2][0][0],itemList[i2][0][1],30,25,225+(i*45),225+(k*45),45,30+(k*2)],itemList[i2][2]]);
+        }
+     }
+   }
+    for (var i = -30; i <= 30; i++){
+       for (var k = -30; k <= 30; k++){
+        if (_x + i > 14) _x -= realMap[0].length-7;
+        if (_y + k > 14) _y -= realMap.length-7;
+        if (_x + i < 5) _x += realMap[0].length-7;
+        if (_y + k < 5) _y += realMap.length-7;
+         c.drawImage(mapImg,b[realMap[_y+k][_x+i]][0],b[realMap[_y+k][_x+i]][1],45,45,90+(i*3),90+(k*3),3,3);
+     }
+  }
+  for (var i = 0, stop = d.length; i < stop; i++) drawEntity(itemImg,d[i][0],false,d[i][1]);
+  c.drawImage(shadowImg,0,0,54,45,84,84,12,12);
+}
+
+function pauseMenu(){
+  var a = data(),
+      b = data(1);
+  a.drawImage(pauseImg,0,0,495,495);
+  b.drawImage(shadowImg,0,0,54,45,0,0,183,183);
+
+}
+
+function drawEntity(s,sA,p,d){
+  var a = data(0);
+  if (!d){
+    if (p) a.drawImage(shadowImg,0,0,54,45,225,225,54,45);
+    else a.drawImage(shadowImg,0,0,54,45,sA[4],sA[5],54,45);
+  }
+  if (p) a.drawImage(s,sA[0],sA[1],sA[2],sA[3],sA[4],sA[5],sA[6],sA[7]);
+  else a.drawImage(s,sA[0],sA[1],sA[2],sA[3],sA[4],sA[5] + (30 - sA[7]),sA[6],sA[7]);
+}
+
+function keyCheck(){ 
+  var realMap = map;
+  
+      for (var i = 0, k = modMap.length; i < k; i++){
+        if (modMap[i][0] == mapLoc.xC && modMap[i][1] == mapLoc.yC){
+          realMap = modMap[i][2];
+        }
+      }
+
+      var a = [0,77,151,230], 
+          b = 100,
+          c = 0,
+          d = realMap[mapLoc.rY+(mapLoc.yC*(realMap.length-7))][mapLoc.rX+(mapLoc.xC*(realMap[0].length-7))];
+
+      if (d == 5){
+        b = 300;
+        c = 20;
+        jump = 0;
+      }
+      else if (d == 0){ 
+        b = 50;
+        jump = 0;
+      }
+      else b = 100;
+	    if (key.a){
+        drawEntity(sprite,[a[counter],95,65,85-c,215,(170+c)-jump,65,85-c],true);
+        if (walkTime < new Date().getTime()-b){
+           counter++;
+             setTimeout(function(){
+               var moveAble = true,
+                   objectList = [];
+               for (var i = 0, k = itemList.length; i < k; i++){
+                 if (itemList[i][3]){
+                   if (mapLoc.rX-1 == itemList[i][1][0] && mapLoc.rY == itemList[i][1][1]){ 
+                    moveAble = false;
+                   }
+                 }
+               }
+               if (key.a && mapLoc.x > 0 && moveAble){ 
+                mapLoc.x--;
+                mapLoc.rX--;
+               }
+               else if (key.a && mapLoc.x > 0) jump = 0;
+               else if (key.a && moveAble){
+                mapLoc.x += map[0].length-7;
+                mapLoc.xC++;
+               }
+               else jump = 0;
+             },c/2);
+          walkTime = new Date().getTime();
+        }
+	   }
+	   if (key.d){
+      drawEntity(sprite,[a[counter],190,65,85-c,215,(170+c)-jump,65,85-c],true);
+      if (walkTime < new Date().getTime()-b){
+      walkTime = new Date().getTime();
+      counter++;
+      setTimeout(function(){
+        var moveAble = true,
+            objectList = [];
+        for (var i = 0, k = itemList.length; i < k; i++){
+          if (itemList[i][3]){
+            if (mapLoc.rX+1 == itemList[i][1][0] && mapLoc.rY == itemList[i][1][1]){ 
+                moveAble = false;
+              }
+            }
+          }
+          if (key.d && mapLoc.x < map[0].length && moveAble) {
+            mapLoc.x++;
+            mapLoc.rX++;
+          }
+          else if (key.d && mapLoc.x < map[0].length) jump = 0;
+          else if (key.d && moveAble){ 
+            mapLoc.x -= map[0].length-7;
+            mapLoc.xC--;
+          }
+          else jump = 0;
+        },c/2); 
+    } 
+	}
+	if (key.s){
+    drawEntity(sprite,[a[counter],0,65,85-c,215,(170+c)-jump,65,85-c],true);
+    if (walkTime < new Date().getTime()-b){
+      walkTime = new Date().getTime();
+      counter++;
+        setTimeout(function(){
+          var moveAble = true,
+            objectList = [];
+          for (var i = 0, k = itemList.length; i < k; i++){
+            if (itemList[i][3]){
+              if (mapLoc.rX == itemList[i][1][0] && mapLoc.rY+1 == itemList[i][1][1]){ 
+                moveAble = false;
+              }
+            }
+          }
+          if (key.s && mapLoc.y < map.length-1 && moveAble){ 
+            mapLoc.y++;
+            mapLoc.rY++;
+          }
+          else if (key.s && mapLoc.y < map.length-1) jump = 0;
+          else if (key.s && moveAble){
+            mapLoc.y -= map.length-7;
+            mapLoc.yC--;
+          }
+          else jump = 0;
+        },c/2);
+    } 
+	}
+	if (key.w){
+    drawEntity(sprite,[a[counter],290,65,85-c,215,(170+c)-jump,65,85-c],true);
+    if (walkTime < new Date().getTime()-b){
+      walkTime = new Date().getTime();
+      counter++;
+        setTimeout(function(){
+          var moveAble = true,
+            objectList = [];
+          for (var i = 0, k = itemList.length; i < k; i++){
+            if (itemList[i][3]){
+              if (mapLoc.rX == itemList[i][1][0] && mapLoc.rY-1 == itemList[i][1][1]){ 
+                moveAble = false;
+              }
+            }
+          }
+          if (key.w && mapLoc.y > 0 && moveAble){ 
+            mapLoc.y--; 
+            mapLoc.rY--;
+          }
+          else if (key.w && mapLoc.y > 0) jump = 0;
+          else if (key.w && moveAble){
+           mapLoc.y += map.length-7;
+           mapLoc.yC++;
+         }
+         else jump = 0;
+        },c/2);
+    }
+	}
+  if (! (key.w || key.a || key.s || key.d)){ 
+    jump = 0;
+    counter = 0;
+    if (key.last == "a") drawEntity(sprite,[a[counter],95,65,85-c,215,170+c,65,85-c],true);
+    if (key.last == "s") drawEntity(sprite,[a[counter],0,65,85-c,215,170+c,65,85-c],true);
+    if (key.last == "d") drawEntity(sprite,[a[counter],190,65,85-c,215,170+c,65,85-c],true);
+    if (key.last == "w") drawEntity(sprite,[a[counter],290,65,85-c,215,170+c,65,85-c],true);
+  } 
+  if (counter == 3) counter = 0;
+}
+
+document.onkeydown = function(e){  
+      switch(e.keyCode){
+	      case 65: 
+          key.a = true; 
+          key.s = false; 
+          key.d = false;
+          key.w = false;
+          key.last = "a";
+          break;
+        case 68: 
+          key.d = true; 
+          key.s = false; 
+          key.a = false;
+          key.w = false;
+          key.last = "d";
+          break;
+        case 83: 
+          key.s = true; 
+          key.a = false; 
+          key.d = false;
+          key.w = false;
+          key.last = "s";
+          break;
+        case 87: 
+          key.w = true; 
+          key.s = false; 
+          key.d = false;
+          key.a = false;
+          key.last = "w";
+          break;
+        case 32:
+          if (pause){
+            pause = false;
+            setTimeout(main,1000/60); 
+          }
+          else pause = true;
+          break;
+  }
+};
+
+document.onkeyup = function(e){ 
+      switch(e.keyCode){
+	      case 65:
+          key.a = false;
+          break;
+        case 68: 
+          key.d = false; 
+          break;
+        case 83: 
+          key.s = false; 
+          break;
+        case 87: 
+          key.w = false; 
+          break;
+  }
+};
+
+function drawTileSelect(x,y){
+  var a = data(2);
+  a.clearRect(0,0,183,183);
+  if (x >= 0 && x <= 45 && y >= 70 && y <= 117) itemNum = 0;
+  if (x >= 70 && x <= 105 && y >= 75 && y <= 105) itemNum = 1;
+  if (x >= 140 && x <= 165 && y >= 75 && y <= 110) itemNum = 2;
+  for (var i = 0; i < 3; i++){
+    if (i == itemNum) {
+      a.beginPath();
+      a.rect(i*65, 70, 45, 45);
+      a.fillStyle = "gold";
+      a.fill();
+    }
+    a.drawImage(itemImg,itemLoc[i][0],itemLoc[i][1],30,30,i*65,70,45,45);
+  }
+}
+
+setTimeout(function(){
+  main();
+  drawTileSelect(0,0);
+  document.getElementById("game").onmousedown = function (e){
+     tileMod(Math.floor((e.pageY-50)/45) +mapLoc.rY-5,Math.floor((e.pageX-200)/45)+mapLoc.rX-5);
+  };
+  document.getElementById("tileSelect").onmousedown = function (e){
+    drawTileSelect(e.pageX-720,e.pageY-362);
+  };
+},200);
+
+  	</script>
+    <div id="info"></div>
+    <center>
+      <canvas id="game" width="495" height="495"></canvas>
+      <canvas id="miniMap" width="183" height="183"></canvas>
+      <canvas id="tileSelect" width="183" height="183"></canvas>
+    </center>
+  </body>
+</html>
